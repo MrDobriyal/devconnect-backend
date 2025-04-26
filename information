@@ -1,0 +1,41 @@
+multer is used for file upload
+
+
+//when frontend is complete
+const socket = io("http://localhost:5000");
+
+// Emit current user ID when they log in
+socket.emit("addUser", userId);
+
+// Send a message
+socket.emit("sendMessage", {
+  senderId: userId,
+  receiverId: otherUserId,
+  text: "Hello!"
+});
+
+// Listen for new incoming messages
+socket.on("getMessage", (data) => {
+  console.log("Received:", data);
+});
+
+//frontend logic
+socket.emit("sendMessage", {
+    senderId,
+    receiverId,
+    text,
+  });
+  
+  // 2. Call your API to save it in DB
+  await axios.post("/api/messages/send", {
+    conversationId,
+    text,
+  });
+
+//   Pagination for old messages
+
+// ✅ Typing indicators
+
+// ✅ Read receipts
+
+// ✅ Online/offline status
