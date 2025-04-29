@@ -1,4 +1,5 @@
 const Post = require('../models/Post');
+const User = require('../models/User');
 
 exports.createPost = async (req, res) => {
   try {
@@ -129,3 +130,14 @@ exports.likePost = async (req, res) => {
     }
 
   }
+
+  exports.getAllPostByUserId = async (req, res) => {
+    try {
+      const { userId } = req.params; // get userId from route parameter
+      const posts = await Post.find({ author: userId }).sort({ createdAt: -1 }); // -1 for newest first
+      return res.json(posts);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server Error' });
+    }
+  };

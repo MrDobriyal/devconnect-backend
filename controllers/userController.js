@@ -61,3 +61,85 @@ exports.getMyProfile = async (req, res) => {
       res.status(500).json({ message: 'Error fetching users', error: err.message });
     }
   }
+
+
+  // exports.getUserById =async(req,res)=>{
+  //   try{
+  //     const { userId } = req.params;
+  //       const user =await User.findById(userId).select('-password');
+  //       return res.json(user);
+  //   }catch(err){
+  //       throw err; 
+  //   }
+  // }
+  exports.getUserById = async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await User.findById(userId).select('-password');
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      return res.json(user);
+    } catch (err) {
+      console.error(err);  // Log the error for debugging
+      return res.status(500).json({ message: 'Server Error' });
+    }
+  };
+
+  exports.updateProfile = async (req, res) => {
+    try {
+      const { name ,userId} = req.body;
+  
+      // Find the user first
+      const user = await User.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      // Update fields manually
+      if (name) {
+        user.name = name;
+      }
+  
+      if (req.file) {
+        user.profilePicture = req.file.path;
+      }
+  
+      // Save the updated user
+      await user.save();
+  
+      // Exclude password from response
+      const { password, ...userWithoutPassword } = user.toObject();
+  
+      res.json(userWithoutPassword);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Something went wrong' });
+    }
+  };
+  
+  exports.searchUsers = async (req, res) => {
+    try {
+      const { q } = req.query; // Grab search query from URL parameters (e.g., `/api/user/search?q=John`)
+      if (!q) {
+        return res.status(400).json({ error: 'Search query is required.' });
+      }
+  
+      // Search users by name or email (case-insensitive)
+      const users = await User.find({
+        $or: [
+          { name: { $regex: q, $options: 'i' } },  // Case-insensitive search by name
+          { email: { $regex: q, $options: 'i' } }, // Case-insensitive search by email
+        ],
+      }).select('-password'); // Exclude password field
+  
+      res.json(users);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Something went wrong while searching for users' });
+    }
+  };
+  
